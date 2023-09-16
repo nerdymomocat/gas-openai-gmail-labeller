@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <base target="_top">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
+    <?!= include('stylesheet'); ?>
+  </head>
+
+  <body>
+
+    <h1>Email Auto-Labeler</h1>
+    <!-- <h1>Email Auto-Labeler <button id="toggleMobileView">📱</button></h1> -->
+    <div class="apiKey-group">
+      <label for="apiKey">OpenAI API Key:</label>
+      <input type="password" id="apiKey">
+      <div class="apiKey-controls">
+        <span class="apiKey-eye" onclick="toggleAPIKeyVisibility()">👁️</span>
+        <button id="saveButton" class="btn-save" onclick="saveApiKey()" style="visibility:hidden">✔️</button>
+      </div>
+      <button class="btn-add" onclick="openModal(null)">➕ New Labeller</button>
+      <button class="btn-import" onclick="importLabels()">📥 Import Labels</button>
+      <button class="btn-set-private-labels" onclick="openPrivateLabelModal()">🫣 Do Not Process</button>
+    </div>
+    <div id="listItems"></div>
+    <div id="privateLabelModal" class="modal">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Set Private Labels</h2>
+          <div class="icon-group">
+            <span class="modal-close" onclick="closePrivateLabelModal()">&times;</span>
+            <span class="btn-save" onclick="savePrivateLabelsFromModal()">✔️</span>
+          </div>
+        </div>
+        <select id="privateLabelDropdown" multiple size="4" class="private-labels-dropdown">
+        </select>
+        <p>You can select multiple labels using Shift.</p>
+      </div>
+    </div>
+    <div id="itemModal" class="modal">
+      <div class="modal-overlay"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Labeller Properties</h2>
+          <div class="icon-group">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <span id="labellerSaveButton" class="btn-save" onclick="saveFromModal()">✔️</span>
+          </div>
+        </div>
+        <input type="text" id="modalLabel" placeholder="Label">
+        <textarea id="modalCriteria" placeholder="Criteria" onfocus="setDefaultText(this)"></textarea>
+        <div class="checkbox-container">
+          <input type="checkbox" id="modalArchive">
+          <label for="modalArchive">Auto Archive</label>
+        </div>
+        <div class="checkbox-container">
+          <input type="checkbox" id="modalRemovable">
+          <label for="modalRemovable">Remove if Inapplicable</label>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let items = [];
+      let currentEditId = null;
+
+      function generateUniqueId() {
+        return '_' + Math.random().toString(36).substr(2, 9);
+      }
+
+      function findItemById(id) {
+        return items.find(item => item.id === id);
+      }
+
+      function addItem(item) {
+        // Generate a new unique ID if the item doesn't have one
+        if (!item.id) {
+          item.id = generateUniqueId();
+        }
+
+        // If the item already exists in the DOM, update it
+        let newItem = document.getElementById(item.id);
+        if (newItem) {
+          newItem.innerHTML = generateItemHTML(item);
+          return;
+        }
+
+        // Otherwise, create a new DOM element
+        newItem = document.createElement('div');
+        newItem.id = item.id; // Unique id for the element
+        newItem.className = 'list-item';
+        newItem.innerHTML = generateItemHTML(item);
+
+        document.getElementById('listItems').appendChild(newItem);
+
+        // Add the new item to the items array if it doesn't exist
+        if (!items.some(existingItem => existingItem.id === item.id)) {
+          items.push(item);
+
+        }
+
+        // Update Google Apps Script storage
+        google.script.run.saveStoredData(items);
+        google.script.run.withSuccessHandler((data) => {
+          const privateLabels = data.privateLabels;
+          if (privateLabels.includes(item.label)) {
+            const newPrivateLabels = privateLabels.filter(pl => pl !== item.label);
+            google.script.run.savePrivateLabels(newPrivateLabels);
+          }
+        }).getLabelData();
+
+      }
+
+      // Helper function to generate the inner HTML for an item
+      function generateItemHTML(item) {
+        const truncatedCriteria = item.criteria.length > 250 ? item.criteria.substring(0, 250) + '...' : item.criteria;
+        return `
+    <div class="card-header">
+      <span class="card-label">${item.label}</span>
+      <div>
+        <button class="btn-edit" onclick="openModal('${item.id}')">✏️</button>
+        <button class="btn-remove" onclick="removeItem('${item.id}')">🗑️</button>
+      </div>
+    </div>
+    <div class="card-content">
+      <div class="card-criteria">${truncatedCriteria}</div>
+      <div class="checkbox-container">
+        <input type="checkbox" id="archive" ${item.archive ? 'checked' : ''} disabled>
+        <label for="archive">Auto Archive</label>
+      </div>
+      <div class="checkbox-container">
+        <input type="checkbox" id="removable" ${item.removable ? 'checked' : ''} disabled>
+        <label for="removable">Remove if Inapplicable</label>
+      </div>
+    </div>
+  `;
+      }
+
+      function removeItem(id) {
+        const index = items.findIndex(item => item.id === id);
+        if (index !== -1) {
+          // Remove item from DOM
+          const itemElement = document.getElementById(id);
+          if (itemElement) {
+            itemElement.remove();
+          }
+
+          // Remove item from items array
+          items.splice(index, 1);
+
+          // Update Google Apps Script storage
+          google.script.run.saveStoredData(items);
+        }
+      }
+
+      function saveFromModal() {
+        const label = document.getElementById('modalLabel').value;
+        const criteria = document.getElementById('modalCriteria').value;
+        const archive = document.getElementById('modalArchive').checked;
+        const removable = document.getElementById('modalRemovable').checked;
+
+        let item = findItemById(currentEditId);
+
+        if (item) {
+          // Update existing item
+          item.label = label;
+          item.criteria = criteria;
+          item.archive = archive;
+          item.removable = removable;
+        } else {
+          // Create a new item
+          item = {
+            label,
+            criteria,
+            archive,
+            removable,
+            id: generateUniqueId()
+          };
+        }
+
+        // Update the item in the DOM and items array
+        addItem(item);
+
+        closeModal(); // Close the modal
+      }
+
+
+      function populateItems(initialItems) {
+        items = initialItems; // Set the global items array
+        const container = document.getElementById('listItems');
+        container.innerHTML = '';
+        items.forEach((item) => {
+          addItem(item); // Add each item to the DOM
+        });
+      }
+
+      // Open modal for adding/editing an item
+      function openModal(id) {
+        validateModalFields();
+        const modal = document.getElementById('itemModal');
+        modal.style.display = 'block';
+        currentEditId = id;
+
+        const item = findItemById(id);
+        if (item) {
+          // Populate the modal with existing item data for editing
+          document.getElementById('modalLabel').value = item.label;
+          document.getElementById('modalCriteria').value = item.criteria;
+          document.getElementById('modalArchive').checked = item.archive;
+          document.getElementById('modalRemovable').checked = item.removable;
+        } else {
+          // Clear the fields for new entries
+          document.getElementById('modalLabel').value = '';
+          document.getElementById('modalCriteria').value = '';
+          document.getElementById('modalArchive').checked = false;
+          document.getElementById('modalRemovable').checked = false;
+        }
+      }
+
+
+      // Close the modal
+      function closeModal() {
+        const modal = document.getElementById('itemModal');
+        modal.style.display = 'none';
+        currentEditId = null; // Reset currentEditId
+      }
+
+      // Populate the initial state from Google Apps Script
+      google.script.run.withSuccessHandler(populateItems).getStoredData();
+
+
+      function setDefaultText(textarea) {
+        // Retrieve the labelInput from the modal
+        const labelInput = document.getElementById('modalLabel');
+
+        if (textarea.value === '' && labelInput.value !== '') {
+          textarea.value = `Does the label "${labelInput.value}" apply to this email content?`;
+        }
+      }
+
+
+      function importLabels() {
+        google.script.run.withSuccessHandler(addImportedLabels).getExistingLabels();
+      }
+
+      function addImportedLabels(existingLabels) {
+        const currentLabels = Array.from(document.querySelectorAll('.card-label')).map(label => label.textContent);
+        google.script.run.withSuccessHandler((data) => {
+          const privateLabels = data.privateLabels;
+          existingLabels.forEach(label => {
+            if (!currentLabels.includes(label) && !privateLabels.includes(label)) {
+              addItem({
+                label: label,
+                criteria: `Does the label "${label}" apply to this email content?`,
+                archive: false,
+                removable: false,
+                id: generateUniqueId()
+              });
+            }
+          });
+        }).getLabelData();
+      }
+
+
+      function saveApiKey() {
+        const apiKey = document.getElementById('apiKey').value;
+        google.script.run.saveApiKey(apiKey);
+        document.getElementById('saveButton').style.visibility = 'hidden';
+      }
+
+      function toggleAPIKeyVisibility() {
+        const apiKeyInput = document.getElementById('apiKey');
+        apiKeyInput.type = apiKeyInput.type === 'password' ? 'text' : 'password';
+      }
+
+      // This loads the API key when the page loads.
+      google.script.run.withSuccessHandler(function(apiKey) {
+        document.getElementById('apiKey').value = apiKey;
+      }).getApiKey();
+
+      function openPrivateLabelModal() {
+        const modal = document.getElementById('privateLabelModal');
+        modal.style.display = 'block';
+        refreshPrivateLabelsInModal();
+      }
+
+      function closePrivateLabelModal() {
+        const modal = document.getElementById('privateLabelModal');
+        modal.style.display = 'none';
+      }
+
+      function savePrivateLabelsFromModal() {
+        const dropdown = document.getElementById("privateLabelDropdown");
+        const selectedLabels = Array.from(dropdown.options)
+          .filter(option => option.selected)
+          .map(option => option.value);
+        google.script.run.savePrivateLabels(selectedLabels);
+        closePrivateLabelModal();
+      }
+
+      function refreshPrivateLabelsInModal() {
+        google.script.run.withSuccessHandler((data) => {
+          const dropdown = document.getElementById("privateLabelDropdown");
+          populateDropdownForModal(dropdown, data.availableLabels, data.privateLabels);
+        }).getLabelData();
+      }
+
+      function populateDropdownForModal(dropdown, availableLabels, privateLabels) {
+        dropdown.innerHTML = "";
+        dropdown.disabled = availableLabels.length === 0;
+
+        if (availableLabels.length === 0) {
+          const option = document.createElement("option");
+          option.text = "None";
+          option.value = "None";
+          option.disabled = true;
+          dropdown.add(option);
+        } else {
+          availableLabels.forEach(label => {
+            const option = document.createElement("option");
+            option.text = label;
+            option.value = label;
+            if (privateLabels.includes(label)) {
+              option.selected = true;
+            }
+            dropdown.add(option);
+          });
+        }
+      }
+
+      function validateModalFields() {
+        const modalLabel = document.getElementById('modalLabel');
+        const modalCriteria = document.getElementById('modalCriteria');
+        const btnSave = document.getElementById('labellerSaveButton');
+
+        // Check if both fields are not empty
+        if (modalLabel.value.trim() !== '' && modalCriteria.value.trim() !== '') {
+          btnSave.style.visibility = 'visible';
+          modalLabel.style.borderColor = 'initial';
+          modalCriteria.style.borderColor = 'initial';
+        } else {
+          btnSave.style.visibility = 'hidden';
+          if (modalLabel.value.trim() === '') {
+            modalLabel.style.borderColor = 'red';
+          } else {
+            modalLabel.style.borderColor = 'initial';
+          }
+          if (modalCriteria.value.trim() === '') {
+            modalCriteria.style.borderColor = 'red';
+          } else {
+            modalCriteria.style.borderColor = 'initial';
+          }
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        
+        const toggleMobileViewButton = document.getElementById('toggleMobileView');
+        if (toggleMobileViewButton !== null) { 
+          
+          toggleMobileViewButton.addEventListener('click', function() {
+            const listItems = document.querySelectorAll('.list-item');
+            const buttons = document.querySelectorAll('.btn-add, .btn-import, .btn-set-private-labels');
+            const apiKeyGroup = document.querySelector('.apiKey-group');
+
+            if (apiKeyGroup.classList.contains('mobile-view')) {
+              // Switch back to normal view
+              listItems.forEach(item => item.style.flex = "");
+              buttons.forEach(button => button.style.flex = "");
+              apiKeyGroup.classList.remove('mobile-view');
+            } else {
+              // Switch to mobile view
+              listItems.forEach(item => item.style.flex = "1 1 calc(100% - 1rem)");
+              buttons.forEach(button => button.style.flex = "1 1 100%");
+              apiKeyGroup.classList.add('mobile-view');
+            }
+          });
+        }
+      });
+
+
+      window.onload = function() {
+        // Your existing code that runs on page load can go here...
+
+        // Listener for changes in the API key input field
+        document.getElementById('apiKey').addEventListener('input', function() {
+          const initialApiKey = document.getElementById('apiKey').defaultValue;
+          const currentApiKey = document.getElementById('apiKey').value;
+
+          if (initialApiKey !== currentApiKey) {
+            // Make the save button visible if the value has changed
+            document.getElementById('saveButton').style.visibility = 'visible';
+          } else {
+            // Make the save button hidden if the value is the same as the initial value
+            document.getElementById('saveButton').style.visibility = 'hidden';
+          }
+        });
+        document.getElementById('modalLabel').addEventListener('input', validateModalFields);
+        document.getElementById('modalLabel').addEventListener('focus', validateModalFields);
+        document.getElementById('modalCriteria').addEventListener('input', validateModalFields);
+        document.getElementById('modalCriteria').addEventListener('focus', validateModalFields);
+
+        document.addEventListener('keydown', function(event) {
+          if (event.key === "Escape") {
+            // Close Item Modal
+            closeModal();
+
+            // Close Private Label Modal
+            closePrivateLabelModal();
+          }
+        });
+      };
+    </script>
+  </body>
+
+</html>
