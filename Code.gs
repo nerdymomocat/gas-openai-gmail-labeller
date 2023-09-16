@@ -36,7 +36,9 @@ function processEmails() {
     var scriptProperties = PropertiesService.getScriptProperties();
     var processedEmails = JSON.parse(scriptProperties.getProperty('processedEmails') || '[]');
     var filters = JSON.parse(scriptProperties.getProperty('emailFilters') || '[]');
-    var threads = GmailApp.getInboxThreads();
+
+    var query = 'in:inbox newer_than:5d';
+    var threads = GmailApp.search(query);
 
     threads.forEach(function(thread) {
         var existingLabelNames = thread.getLabels().map(label => label.getName());
