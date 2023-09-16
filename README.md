@@ -4,10 +4,13 @@
 ## Interface:
 1. Welcome Screen
 <img width="1240" alt="image" src="https://github.com/nerdymomocat/gas-openai-gmail-labeller/assets/125716950/eff24228-c431-43de-b2a5-ede37f8fe2f8">
+
 2. New Labeller
 <img width="428" alt="image" src="https://github.com/nerdymomocat/gas-openai-gmail-labeller/assets/125716950/bdc3c87a-7b9f-4f2c-b2d2-c64f44fb844a">
+
 3. Edit Screen
 <img width="424" alt="image" src="https://github.com/nerdymomocat/gas-openai-gmail-labeller/assets/125716950/7660b861-2f24-4ca0-8a01-3b35c4fb0a88">
+
 4. Do Not Process Labels
 <img width="423" alt="image" src="https://github.com/nerdymomocat/gas-openai-gmail-labeller/assets/125716950/c3a1d991-8c55-47b4-8a11-9e50a432864f">
 
