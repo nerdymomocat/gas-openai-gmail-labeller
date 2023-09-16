@@ -58,13 +58,12 @@
     }
 
     #listItems {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
       gap: 1rem;
     }
 
     .list-item {
-      flex: 1 1 calc(100% - 1rem);
       border: 1px solid #ccc;
       border-radius: 0.25rem;
       margin-bottom: 1rem;
@@ -174,14 +173,14 @@
     }
 
     @media (min-width: 600px) {
-      .list-item {
-        flex: 1 1 calc(33.333% - 1rem);
+      #listItems {
+        grid-template-columns: repeat(auto-fill, minmax(calc(33.333% - 1rem), 1fr));
       }
     }
 
     @media (min-width: 900px) {
-      .list-item {
-        flex: 1 1 calc(20% - 1rem);
+      #listItems {
+        grid-template-columns: repeat(auto-fill, minmax(calc(20% - 1rem), 1fr));
       }
     }
 
@@ -194,9 +193,6 @@
 
     /* Add this media query for smallest screens */
     @media (max-width: 599px) {
-      .list-item {
-        flex: 1 1 100%; /* One card per row */
-      }
 
       .apiKey-group {
         flex-wrap: wrap; /* Allow wrapping of items */
@@ -205,14 +201,14 @@
       label[for="apiKey"],
       #apiKey,
       .apiKey-controls {
-        flex: 1 1 100%; /* Take full width */
+        flex: 1 0 100%; /* Take full width */
       }
 
       .btn-add,
       .btn-import,
       .btn-set-private-labels {
         order: 1; /* Move to the second row */
-        flex: 1 1 100%; /* Take full width */
+        flex: 1 0 100%; /* Take full width */
         margin-top: 1rem; /* Add some top margin for spacing */
       }
     }
