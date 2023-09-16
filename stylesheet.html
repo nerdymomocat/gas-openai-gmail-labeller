@@ -1,0 +1,219 @@
+  <style>
+    body,
+    input,
+    button,
+    select,
+    textarea {
+      font-family: 'Karla', sans-serif;
+      margin: 0;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    body {
+      margin: 2rem;
+    }
+
+    .apiKey-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    label[for="apiKey"] {
+      flex: 2;
+    }
+
+    #apiKey {
+      flex: 4;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.25rem;
+    }
+
+    .apiKey-controls {
+      flex: 1;
+      display: flex;
+    }
+
+    .apiKey-eye {
+      padding-right: 8px;
+      padding-left: 8px;
+    }
+
+    .btn-save {
+      font-size: 1rem;
+      padding: 4px;
+      background: none;
+      border: none;
+    }
+
+    .btn-add,
+    .btn-import {
+      flex: 2;
+      font-size: 0.9rem;
+      border: none;
+      background: none;
+    }
+
+    #listItems {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .list-item {
+      flex: 1 1 calc(100% - 1rem);
+      border: 1px solid #ccc;
+      border-radius: 0.25rem;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-content {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      background-color: #f1f1f1;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      margin-bottom: .5rem;
+    }
+
+    .card-label {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .btn-edit,
+    .btn-remove {
+      background: none;
+      border: none;
+    }
+
+    .card-criteria {
+      margin-bottom: 0.5rem;
+    }
+
+    .checkbox-container {
+      margin-bottom: 0.5rem;
+    }
+
+    .checkbox-container.removable {
+      margin-bottom: 0;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      /* Make sure it's above other elements */
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      /* Black background with 0.5 opacity */
+    }
+
+    .modal-content {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #FFF;
+      padding: 20px;
+      width: 400px;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      z-index: 2;
+      /* Make sure it's above the overlay */
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .icon-group {
+      /* Add this class */
+      display: flex;
+      gap: 8px;
+    }
+
+    .modal-close,
+    .btn-save {
+      padding: 0 8px;
+    }
+
+    .modal-content input[type="text"],
+    .modal-content textarea {
+      padding: 8px;
+      margin: 8px 0;
+    }
+
+    .btn-save,
+    .modal-close {
+      font-size: 1rem;
+    }
+
+    @media (min-width: 600px) {
+      .list-item {
+        flex: 1 1 calc(33.333% - 1rem);
+      }
+    }
+
+    @media (min-width: 900px) {
+      .list-item {
+        flex: 1 1 calc(20% - 1rem);
+      }
+    }
+
+    .btn-set-private-labels {
+      flex: 2;
+      font-size: 0.9rem;
+      border: none;
+      background: none;
+    }
+
+    /* Add this media query for smallest screens */
+    @media (max-width: 599px) {
+      .list-item {
+        flex: 1 1 100%; /* One card per row */
+      }
+
+      .apiKey-group {
+        flex-wrap: wrap; /* Allow wrapping of items */
+      }
+
+      label[for="apiKey"],
+      #apiKey,
+      .apiKey-controls {
+        flex: 1 1 100%; /* Take full width */
+      }
+
+      .btn-add,
+      .btn-import,
+      .btn-set-private-labels {
+        order: 1; /* Move to the second row */
+        flex: 1 1 100%; /* Take full width */
+        margin-top: 1rem; /* Add some top margin for spacing */
+      }
+    }
+  </style>
