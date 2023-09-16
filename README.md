@@ -39,6 +39,27 @@ If you have emails that you do not want to send to OpenAI for whatever reason, y
 (a) You can choose your own OpenAI key
 (b) You can use it with email accounts that are managed by your organization and you are not an admin. Because this is a personal script, it works!
 
+## GPT Prompts
+A major part of this was made using prompts. To be clear, I know how to program, I just did not want to write javascript or figure out stuff in Google Apps Scripts. You will see how much I had to struggle with GPT 4 to get these 600-800 lines of code.
+
+[Fixing ID Based Errors](https://chat.openai.com/share/eb70624b-95ae-46ca-b0e1-cc39b4c1af47)
+
+[Styling](https://chat.openai.com/share/104c44aa-71f3-4023-aaed-8611763eb689)
+
+[Writing the Script](https://chat.openai.com/share/a4125873-502f-4be1-b706-41143dc03989)
+
+[JSON Schema](https://chat.openai.com/share/643e1d87-a2ae-47bf-8e9c-b3811662dcf5)
+
+[Website Components](https://chat.openai.com/share/f37c4c47-4779-40a8-9b86-445997cd2618)
+
+[CSS and HTML modifications](https://chat.openai.com/share/0be8ae48-ca9a-4963-8a6f-1c4eb831aa30)
+
+[More HTML and CSS fixing](https://chat.openai.com/share/4be2f5fd-c873-48be-9208-a17ac4cc8862)
+
+[Remove Removable](https://chat.openai.com/share/98f53ebc-f538-4544-b44b-361eeb1f15d8)
+
+[Add New Modal and Fix Index to ID based system](https://chat.openai.com/share/4026faf3-52d7-4e89-8fcf-58bdfedfd6ef)
+
 Have fun!
 
 
