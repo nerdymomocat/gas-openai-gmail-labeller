@@ -1,6 +1,6 @@
 # Auto Email Labeller for GMail using OpenAI API
 
-https://github.com/nerdymomocat/gas-openai-gmail-labeller/assets/125716950/6b77cc61-880d-42f8-b28e-b6c57f6e3cd4
+![Quick Overview](https://github.com/nerdymomocat/gas-openai-gmail-labeller/assets/125716950/6b77cc61-880d-42f8-b28e-b6c57f6e3cd4)
 
 
 ## Interface:
