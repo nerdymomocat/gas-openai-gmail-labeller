@@ -60,7 +60,9 @@ A major part of this was made using prompts. To be clear, I know how to program,
 
 [Add New Modal and Fix Index to ID based system](https://chat.openai.com/share/4026faf3-52d7-4e89-8fcf-58bdfedfd6ef)
 
-Have fun!
+---
+
+## Have fun!
 
 
 
