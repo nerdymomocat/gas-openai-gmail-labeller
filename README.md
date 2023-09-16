@@ -60,6 +60,8 @@ A major part of this was made using prompts. To be clear, I know how to program,
 
 [Add New Modal and Fix Index to ID based system](https://chat.openai.com/share/4026faf3-52d7-4e89-8fcf-58bdfedfd6ef)
 
+[Filter Emails](https://chat.openai.com/share/8ac2f484-be7c-4843-8399-550a1bcdcf0f)
+
 ## Potential Problems and Missing Features
 
 ### AI issues
